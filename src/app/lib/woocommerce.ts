@@ -1,9 +1,10 @@
 import WooCommerceRestApi from "@woocommerce/woocommerce-rest-api";
 
+// src/app/lib/woocommerce.ts — fix this NOW
 const api = new WooCommerceRestApi({
-  url: "https://saddlebrown-porpoise-760293.hostingersite.com/",
-  consumerKey: "ck_5234d3c8283f9cf90dde57785fec6d8db08bcfab",
-  consumerSecret: "cs_cec1790151b43df1a94cbf5d94f77a9b8f965eca",
+  url: process.env.WORDPRESS_URL!,
+  consumerKey: process.env.WC_CONSUMER_KEY!,
+  consumerSecret: process.env.WC_CONSUMER_SECRET!,
   version: "wc/v3",
 });
 
