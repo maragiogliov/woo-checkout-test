@@ -2,6 +2,13 @@ import api from "../lib/woocommerce";
 import TestWooClient from "./TestWooClient";
 
 export default async function TestPage() {
+
+      console.log("ENV CHECK:", {
+    url: process.env.WORDPRESS_URL,
+    key: process.env.WC_CONSUMER_KEY,
+    secret: process.env.WC_CONSUMER_SECRET,
+  });
+
   const res = await api.get("products");
 
   const products = res.data;

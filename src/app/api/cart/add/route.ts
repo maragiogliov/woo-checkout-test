@@ -6,7 +6,6 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const nonce = req.headers.get("x-wc-store-api-nonce");
 
     const baseUrl = process.env.WORDPRESS_URL;
 
