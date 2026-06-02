@@ -1,51 +1,57 @@
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-    const nonce = req.headers.get("x-wc-store-api-nonce");
-    const cartToken = req.headers.get("cart-token"); // ✅ add this
   try {
     const body = await req.json();
 
-
     const baseUrl = process.env.WORDPRESS_URL;
 
-    console.log("WP BASE URL:", baseUrl);
-    console.log("NONCE RECEIVED:", nonce);
-    console.log("BODY:", body);
+    const nonce = req.headers.get("x-wc-store-api-nonce") || "";
+    const cartToken = req.headers.get("cart-token") || "";
 
-const res = await fetch(`${baseUrl}/wp-json/wc/store/cart/add-item`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    ...(nonce ? { "X-WC-Store-API-Nonce": nonce } : {}),
-    // ✅ Add this
-    ...(cartToken ? { "Cart-Token": cartToken } : {}),
-  },
-  body: JSON.stringify(body),
-});
+    const res = await fetch(
+      `${baseUrl}/wp-json/wc/store/v1/cart/add-item`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+
+          ...(nonce ? { "X-WC-Store-API-Nonce": nonce } : {}),
+          ...(cartToken ? { "Cart-Token": cartToken } : {}),
+        },
+        body: JSON.stringify({
+          id: Number(body.id),
+          quantity: Number(body.quantity ?? 1),
+          cart_item_data: {},
+        }),
+      }
+    );
 
     const text = await res.text();
 
-    console.log("WORDPRESS RAW RESPONSE:", text);
-
-    let data;
+    let wooResponse;
     try {
-      data = JSON.parse(text);
+      wooResponse = JSON.parse(text);
     } catch {
-      data = { raw: text };
+      wooResponse = text;
     }
-
-    return NextResponse.json(data, { status: res.status });
-  } catch (err: any) {
-    console.error("API ERROR:", err);
 
     return NextResponse.json(
       {
-        error: "Internal Server Error",
-        message: err.message,
+        status: res.status,
+        ok: res.ok,
+        wooResponse,
+        sent: {
+          id: Number(body.id),
+          quantity: Number(body.quantity ?? 1),
+        },
       },
+      { status: res.status }
+    );
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: err.message },
       { status: 500 }
     );
   }
 }
-
