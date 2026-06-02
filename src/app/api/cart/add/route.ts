@@ -5,7 +5,6 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const baseUrl = process.env.WORDPRESS_URL;
-
     const nonce = req.headers.get("x-wc-store-api-nonce") || "";
     const cartToken = req.headers.get("cart-token") || "";
 
@@ -15,7 +14,6 @@ export async function POST(req: Request) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-
           ...(nonce ? { "X-WC-Store-API-Nonce": nonce } : {}),
           ...(cartToken ? { "Cart-Token": cartToken } : {}),
         },
@@ -28,7 +26,6 @@ export async function POST(req: Request) {
     );
 
     const text = await res.text();
-
     let wooResponse;
     try {
       wooResponse = JSON.parse(text);
@@ -36,22 +33,28 @@ export async function POST(req: Request) {
       wooResponse = text;
     }
 
-    return NextResponse.json(
+    const returnedNonce =
+      res.headers.get("Nonce") ?? res.headers.get("nonce") ?? nonce ?? "";
+    const returnedCartToken =
+      res.headers.get("Cart-Token") ?? res.headers.get("cart-token") ?? cartToken ?? "";
+
+    const response = NextResponse.json(
       {
         status: res.status,
         ok: res.ok,
         wooResponse,
-        sent: {
-          id: Number(body.id),
-          quantity: Number(body.quantity ?? 1),
-        },
+        nonce: returnedNonce,
+        cartToken: returnedCartToken,
+        sent: { id: Number(body.id), quantity: Number(body.quantity ?? 1) },
       },
       { status: res.status }
     );
+
+    const setCookie = res.headers.get("set-cookie");
+    if (setCookie) response.headers.set("set-cookie", setCookie);
+
+    return response;
   } catch (err: any) {
-    return NextResponse.json(
-      { error: err.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

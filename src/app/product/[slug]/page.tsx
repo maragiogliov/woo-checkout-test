@@ -48,11 +48,7 @@ export default async function ProductPage({ params }: PageProps) {
 
   const inStock = product.stock_status === "instock";
 
-  // ✅ FIX: normalize product ID (VERY IMPORTANT)
-  const safeProductId =
-    typeof product.id === "object"
-      ? product.id?.id
-      : product.id;
+  const productId = Number(product.id);
 
   return (
     <>
@@ -75,7 +71,6 @@ export default async function ProductPage({ params }: PageProps) {
 
         <div className="pd-layout">
 
-          {/* IMAGE */}
           <div className="pd-image-col">
             <div className="pd-image-frame">
               {image ? (
@@ -98,7 +93,6 @@ export default async function ProductPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* INFO */}
           <div className="pd-info-col">
             {category && <p className="pd-category">{category}</p>}
 
@@ -127,8 +121,7 @@ export default async function ProductPage({ params }: PageProps) {
               </span>
             </div>
 
-            {/* ✅ FIXED: ALWAYS PASS NUMBER */}
-            <AddToCartButton productId={Number(safeProductId)} />
+            <AddToCartButton productId={productId} />
 
             <a href="/cart" className="pd-btn-outline">
               View Cart →
