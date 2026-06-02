@@ -3,12 +3,12 @@
 import { addToCart } from "../lib/cart";
 
 export default function AddToCartButton({
-  productId,
+  product,
 }: {
-  productId: number;
+  product: any;
 }) {
   return (
-    <button onClick={() => addToCart({ id: productId })}>
+    <button onClick={() => addToCart(product)}>
       Add to Cart
     </button>
   );
