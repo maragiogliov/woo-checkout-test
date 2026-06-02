@@ -42,7 +42,7 @@ export default function TestWooClient({ productId }: { productId: number }) {
     try {
       data = JSON.parse(text);
     } catch (e) {
-      console.error("Server did not return JSON:", text);
+      console.error("Server did not return JSON::", text);
       return;
     }
 
