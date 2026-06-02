@@ -1,43 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getCartCount } from "../lib/cart";
+import { getCart } from "../lib/woo-cart";
 
 export default function CartBadge() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    const update = () => setCount(getCartCount());
+    async function update() {
+      const cart = await getCart();
+      setCount(cart?.items_count || 0);
+    }
 
     update();
 
-    window.addEventListener("storage", update);
+    const interval = setInterval(update, 3000);
 
-    const interval = setInterval(update, 500);
-
-    return () => {
-      window.removeEventListener("storage", update);
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <div style={{ position: "relative" }}>
-      🛒 Cart
-      {count > 0 && (
-        <span
-          style={{
-            marginLeft: 6,
-            background: "red",
-            color: "white",
-            borderRadius: 999,
-            padding: "2px 6px",
-            fontSize: 12,
-          }}
-        >
-          {count}
-        </span>
-      )}
+    <div>
+      🛒 Cart {count > 0 && <span>({count})</span>}
     </div>
   );
 }

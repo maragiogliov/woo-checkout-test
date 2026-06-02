@@ -1,22 +1,9 @@
-let cachedCart: any = null;
-
-export async function getCart(force = false) {
-  if (cachedCart && !force) return cachedCart;
-
-  const cartToken = cachedCart?.cartToken || "";
-
+export async function getCart() {
   const res = await fetch("/api/cart", {
-    method: "GET",
-    headers: {
-      "Cart-Token": cartToken,
-    },
     cache: "no-store",
   });
 
-  const data = await res.json();
-  cachedCart = data;
-
-  return data;
+  return res.json();
 }
 
 export async function addToCart(productId: number, quantity = 1) {
@@ -26,19 +13,21 @@ export async function addToCart(productId: number, quantity = 1) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-WC-Store-API-Nonce": cart.nonce,
-      "Cart-Token": cart.cartToken,
+
+      "x-wc-store-api-nonce": cart.nonce,
+      "cart-token": cart.cartToken,
     },
     body: JSON.stringify({
-      id: Number(productId),
-      quantity: Number(quantity),
+      id: productId,
+      quantity,
     }),
   });
 
   const data = await res.json();
 
-  // IMPORTANT: refresh cart after mutation
-  await getCart(true);
+  if (!res.ok) {
+    throw new Error("Add to cart failed");
+  }
 
   return data;
 }
